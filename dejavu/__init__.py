@@ -118,7 +118,7 @@ class Dejavu:
         pool.close()
         pool.join()
 
-    def fingerprint_file(self, file_path: str, song_name: str = None) -> None:
+    def fingerprint_file(self, file_path: str, song_name: str = None) -> bool:
         """
         Given a path to a file the method generates hashes for it and stores them in the database
         for later be queried.
@@ -132,6 +132,7 @@ class Dejavu:
         # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
             print(f"{song_name} already fingerprinted, continuing...")
+            return False
         else:
             song_name, hashes, file_hash = Dejavu._fingerprint_worker(
                 file_path,
@@ -143,6 +144,7 @@ class Dejavu:
             self.db.insert_hashes(sid, hashes)
             self.db.set_song_fingerprinted(sid)
             self.__load_fingerprinted_audio_hashes()
+            return True
 
     def generate_fingerprints(self, samples: List[int], Fs=DEFAULT_FS) -> Tuple[List[Tuple[str, int]], float]:
         f"""
